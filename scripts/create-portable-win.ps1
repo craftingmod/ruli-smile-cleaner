@@ -7,7 +7,7 @@ $portableRoot = "build\portable"
 $portableApp = Join-Path $portableRoot "app"
 $extractDir = "build\portable-extract"
 $zstd = "node_modules\electrobun\dist-win-x64\zig-zstd.exe"
-$portableZip = "build\ruli-smile-cleaner-portable-win-x64.zip"
+$portableZip = "build\smilecleaner-portable.zip"
 
 Remove-Item -Recurse -Force $portableRoot, $extractDir -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $portableApp, $extractDir | Out-Null

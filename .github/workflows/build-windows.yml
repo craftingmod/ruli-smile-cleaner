@@ -29,6 +29,16 @@ jobs:
       - name: Build stable
         run: bun run build:stable
 
+      - name: Normalize setup zip name
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $setupZip = Get-ChildItem "artifacts\*Setup.zip" | Select-Object -First 1
+          if ($null -eq $setupZip) {
+            throw "Electrobun setup zip was not found."
+          }
+          Copy-Item $setupZip.FullName "build\smilecleaner-setup.zip" -Force
+
       - name: Create portable zip
         shell: pwsh
         run: ./scripts/create-portable-win.ps1
@@ -38,13 +48,13 @@ jobs:
         with:
           name: ruli-smile-cleaner-windows
           path: |
-            artifacts/*Setup.zip
-            build/ruli-smile-cleaner-portable-win-x64.zip
+            build/smilecleaner-setup.zip
+            build/smilecleaner-portable.zip
 
       - name: Publish GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/*Setup.zip
-            build/ruli-smile-cleaner-portable-win-x64.zip
+            build/smilecleaner-setup.zip
+            build/smilecleaner-portable.zip
