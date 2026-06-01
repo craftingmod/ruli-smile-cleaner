@@ -20,8 +20,20 @@ if ($null -eq $innerArchive) {
 & $zstd decompress -i $innerArchive.FullName -o (Join-Path $extractDir "app.tar")
 tar -xf (Join-Path $extractDir "app.tar") -C $extractDir
 
-Move-Item (Join-Path $extractDir "bin") (Join-Path $portableApp "bin")
-Move-Item (Join-Path $extractDir "Resources") (Join-Path $portableApp "Resources")
+$appBundle = Get-ChildItem $extractDir -Directory -Recurse |
+  Where-Object {
+    (Test-Path (Join-Path $_.FullName "bin")) -and
+    (Test-Path (Join-Path $_.FullName "Resources"))
+  } |
+  Sort-Object { $_.FullName.Length } |
+  Select-Object -First 1
+
+if ($null -eq $appBundle) {
+  throw "Extracted Electrobun app bundle was not found."
+}
+
+Move-Item (Join-Path $appBundle.FullName "bin") (Join-Path $portableApp "bin")
+Move-Item (Join-Path $appBundle.FullName "Resources") (Join-Path $portableApp "Resources")
 
 $launcher = Join-Path $portableApp "bin\launcher.exe"
 if (!(Test-Path $launcher)) {
