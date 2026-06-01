@@ -15,22 +15,23 @@ const cleanerFn = async () => {
    * @param {Array<Record<string, unknown>>} objData Object Data
    * @param {string} filename Filename
    */
+  const escapeCsvValue = (value) => {
+    const text = String(value ?? "")
+    return `"${text.replace(/"/g, "\"\"")}"`
+  }
+
   const exportData = (objData, filename) => {
     if (objData.length <= 0) {
       return
     }
-    let csvText = Object.keys(objData[0]).join(",")
+    let csvText = Object.keys(objData[0]).map(escapeCsvValue).join(",")
     csvText += "\n"
     for (const obj of objData) {
-      csvText += Object.values(obj).map((v) => {
-        return String(v)
-          .replace(/,/g, ".")
-          .replace(/\s+/ig, " ")
-      }).join(",")
+      csvText += Object.values(obj).map(escapeCsvValue).join(",")
       csvText += "\n"
     }
     // download
-    const blob = new Blob([csvText], { type: "text/csv" })
+    const blob = new Blob(["\ufeff", csvText], { type: "text/csv;charset=utf-8" })
     const tempElement = document.createElement("a")
     tempElement.href = URL.createObjectURL(blob)
     tempElement.download = `${filename}.csv`
@@ -130,7 +131,7 @@ const cleanerFn = async () => {
     return comments
   }
 
-  const removeALLArticles = async () => {
+  const collectArticles = async () => {
     let removeArticles = []
     let page = 1
     while (true) {
@@ -152,9 +153,10 @@ const cleanerFn = async () => {
       }
     }
 
-    updateCurrent(`게시글 삭제를 시작합니다.`)
-    exportData(removeArticles, "게시글_목록")
+    return removeArticles
+  }
 
+  const deleteArticles = async (removeArticles) => {
     const removeURL = `https://api.ruliweb.com/procDeleteMyArticle`
     const totalArticleCounts = removeArticles.length
 
@@ -194,7 +196,7 @@ const cleanerFn = async () => {
     updateCurrent(`게시글 삭제가 완료되었습니다.`)
   }
 
-  const removeALLComments = async () => {
+  const collectComments = async () => {
     let removeComments = []
     let page = 1
     while (true) {
@@ -216,9 +218,10 @@ const cleanerFn = async () => {
       }
     }
 
-    updateCurrent(`댓글 삭제를 시작합니다.`)
-    exportData(removeComments, "댓글_목록")
+    return removeComments
+  }
 
+  const deleteComments = async (removeComments) => {
     const removeURL = `https://api.ruliweb.com/procDeleteMyComment`
     const totalCommentCounts = removeComments.length
 
@@ -257,6 +260,21 @@ const cleanerFn = async () => {
     }
   }
 
+  const confirmDeleteCollectedData = (articleCount, commentCount) => {
+    const confirmMessage = [
+      `삭제 대상 수집 및 백업 파일 생성이 완료되었습니다.`,
+      ``,
+      `백업 위치: 기본 다운로드 폴더의 '댓글_목록' 및 '게시글_목록' csv 파일`,
+      `삭제할 게시글: ${articleCount}개`,
+      `삭제할 댓글: ${commentCount}개`,
+      ``,
+      `이 작업은 복구할 수 없습니다.`,
+      `정말 삭제하려면 아래 입력창에 '동의합니다'를 입력해주세요.`,
+    ].join("\n")
+
+    return prompt(confirmMessage) === "동의합니다"
+  }
+
   const runFn = async () => {
     let wakelock = null
 
@@ -266,23 +284,37 @@ const cleanerFn = async () => {
       console.error(err3)
     }
 
-    // 게시글
-    await removeALLArticles()
-    // ...
-    updateCurrent(`댓글 삭제를 시작합니다.`)
-    await sleep(1000)
-
-    // 댓글
-    await removeALLComments()
     try {
-      if (wakelock != null) {
-        await wakelock.release()
-        wakelock = null
+      const articlesToRemove = await collectArticles()
+      const commentsToRemove = await collectComments()
+
+      updateCurrent(`백업 파일을 생성합니다. (게시글 ${articlesToRemove.length}개, 댓글 ${commentsToRemove.length}개)`)
+      exportData(articlesToRemove, "게시글_목록")
+      exportData(commentsToRemove, "댓글_목록")
+
+      if (!confirmDeleteCollectedData(articlesToRemove.length, commentsToRemove.length)) {
+        updateCurrent(`삭제가 취소되었습니다. 백업 파일을 확인해주세요.`)
+        return
       }
-    } catch (err4) {
-      console.error(err4)
+
+      updateCurrent(`게시글 삭제를 시작합니다.`)
+      await deleteArticles(articlesToRemove)
+
+      updateCurrent(`댓글 삭제를 시작합니다.`)
+      await sleep(1000)
+      await deleteComments(commentsToRemove)
+
+      confirm(`클리닝을 완료했습니다! 안녕히 가세요!`)
+    } finally {
+      try {
+        if (wakelock != null) {
+          await wakelock.release()
+          wakelock = null
+        }
+      } catch (err4) {
+        console.error(err4)
+      }
     }
-    confirm(`클리닝을 완료했습니다! 안녕히 가세요!`)
   }
 
   await runFn()
@@ -290,8 +322,9 @@ const cleanerFn = async () => {
 
 const cleanerPreRequest = async () => {
   const nicknameDom = document.querySelector(".nick_name > .info_value")
-  if (nicknameDom == null || nicknameDom.textContent.length <= 0) {
-    console.log("Login to run cleaner")
+  if (nicknameDom == null || nicknameDom.textContent == null || nicknameDom.textContent.length <= 0) {
+    alert("로그인이 되어있지 않습니다. 실행을 위해 로그인을 해주세요.")
+    return
   }
   const nickname = nicknameDom.textContent
   const warnMessage = "진짜 작성 게시글&댓글이 모두 삭제되고 복구할 수 없습니다!"

@@ -11,7 +11,7 @@ const cleanerPreloadScript = escapeNonAscii(
 
 // Create the main application window
 const mainWindow = new BrowserWindow({
-	title: "Hello Electrobun!",
+	title: "Smile Cleaner",
 	url: articleURL,
 	frame: {
 		width: 800,

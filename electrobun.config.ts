@@ -18,12 +18,15 @@ export default {
 			"src/mainview/index.css": "views/mainview/index.css",
 		},
 		mac: {
+			icons: "assets/icons/smile.icns",
 			bundleCEF: false,
 		},
 		linux: {
+			icon: "assets/icons/smile.png",
 			bundleCEF: false,
 		},
 		win: {
+			icon: "assets/icons/smile.ico",
 			bundleCEF: false,
 		},
 	},
