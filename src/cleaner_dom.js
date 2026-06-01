@@ -1,7 +1,8 @@
+// Browser-context cleaner script.
+// It reads the current Ruliweb session, exports local CSV backups, then deletes
+// selected user articles/comments only after explicit confirmation.
+// It does not send collected article/comment data to non-Ruliweb servers.
 const cleanerFn = async () => {
-  // fn define
-  let running = false
-  const removeBtn = document.querySelector("article button[autofocus='1']")
   const progressDOM = document.querySelector("#myarticle > .center_area_top > h1")
   const isMobile = location.href.indexOf("m.ruliweb.com") >= 0
   const isDebug = false
@@ -321,7 +322,7 @@ const cleanerFn = async () => {
   await runFn()
 }
 
-const awesomeButtonCSS = `
+const cleanerButtonCSS = `
 #smile-cleaner-run {
   position: fixed;
   right: 24px;
@@ -396,7 +397,7 @@ const addCleanerButton = () => {
   }
 
   const style = document.createElement("style")
-  style.textContent = awesomeButtonCSS
+  style.textContent = cleanerButtonCSS
   document.head.appendChild(style)
 
   const button = document.createElement("button")

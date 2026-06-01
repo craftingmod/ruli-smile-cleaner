@@ -42,6 +42,17 @@
 - 로그인 중 브라우저 권한 요청이 뜨면, 클리너 기능에는 보통 필요하지 않으므로 거절해도 됩니다. 간혹 CSV 다운로드가 안되었다면 클리너 작동 중에 묻는 권한만 허용해주세요.
 - 사이트 구조나 API가 바뀌면 클리너가 동작하지 않을 수 있습니다.
 
+## 네트워크 요청 범위
+
+클리너는 로그인된 브라우저 세션을 사용하며, 수집한 게시글/댓글 데이터를 외부 서버로 전송하지 않습니다.
+
+삭제 및 목록 수집을 위해 아래 루리웹 도메인으로만 요청합니다.
+
+- `bbs.ruliweb.com/member/mypage/myarticle`
+- `bbs.ruliweb.com/member/mypage/mycomment`
+- `api.ruliweb.com/procDeleteMyArticle`
+- `api.ruliweb.com/procDeleteMyComment`
+
 ## Q&A
 
 **Q. 파일 구조도 실행 화면도 못생겼어요.**  
