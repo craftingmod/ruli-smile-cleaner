@@ -38,7 +38,7 @@ jobs:
         with:
           name: ruli-smile-cleaner-windows
           path: |
-            artifacts/*
+            artifacts/*Setup.zip
             build/ruli-smile-cleaner-portable-win-x64.zip
 
       - name: Publish GitHub Release
@@ -46,5 +46,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/*
+            artifacts/*Setup.zip
             build/ruli-smile-cleaner-portable-win-x64.zip
