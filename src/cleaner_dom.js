@@ -279,7 +279,7 @@ const cleanerFn = async () => {
     let wakelock = null
 
     try {
-      wakelock = await navigator.wakeLock.request("screen")
+      // wakelock = await navigator.wakeLock.request("screen")
     } catch (err3) {
       console.error(err3)
     }
