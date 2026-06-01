@@ -1,16 +1,53 @@
-## Smile Cleaner
+# 황달 클리너
 
-A replacement of `smile cleaner` which was deployed by XSS.
-It cleans articles and comments of `ruri` site.
+![아이콘](./assets/icons/smile.png)
 
-## Dev
+루리웹에서 쓴 글 및 댓글을 싹 지웁니다. 
+
+[딸깍으로 배포된 황달 클리너](https://bbs.ruliweb.com/community/board/300143/read/66538672)를 돌리기 위한 보안 취약점이 수정되어 막혀 직접 실행하는 방법으로 배포하는 버전입니다.
+
+스크립트를 돌리기 위해 다운로드 받는 파일 크기가 매우 커졌지만 실제로 돌아가는 스크립트는 같습니다.
+
+## 실행법
+Release 탭에 가서 최신 버전의 Setup (설치) / Portable (미설치)를 다운로드 받습니다. (Portable이 사용하기 더 편합니다.)
+ * Setup은 Setup.exe를 클릭해 설치
+ * Portable은 압축을 풀어 `황달클리너_실행.bat` 클릭
+
+이후 창이 뜨고 거기서 로그인을 하면 실행할 거냐고 알림이 뜹니다.
+
+## 개발자 콘솔로 실행
+
+앱을 다운로드하지 않고 브라우저 개발자 콘솔에서 직접 실행할 수도 있습니다.
+브라우저가 콘솔 붙여넣기를 경고하는 경우가 있으니, 반드시 이 저장소의 `src/cleaner_dom.js` 내용을 직접 확인한 뒤 실행해주세요.
+
+1. 브라우저에서 루리웹에 로그인합니다.
+2. `https://bbs.ruliweb.com/member/mypage/myarticle` 페이지로 이동합니다.
+3. 개발자 도구를 열고 Console 탭으로 이동합니다.
+4. `src/cleaner_dom.js` 파일 내용을 전체 복사해 콘솔에 붙여넣고 실행합니다.
+5. 게시글/댓글 수집 및 CSV 백업이 끝난 뒤 표시되는 개수를 확인합니다.
+6. 정말 삭제하려면 입력창에 `동의합니다`를 입력합니다.
+
+콘솔 방식은 앱과 달리 직접 실행하는 방식이므로, 다른 사람이 전달한 축약/변조 스크립트는 사용하지 않는 것을 권장합니다.
+
+## Q&A
+ * Q: 파일 구조도 실행 화면도 못생겼어요.
+   * A: 원 구조를 최대한 유지하면서 가볍게 돌아가게 하려 하니 어쩔 수 없습니다.
+ * Q: 제 개인정보를 빼가지 않나요?
+   * A: 클리너 기능만 돌아가고 개인정보는 전혀 빼가지 않습니다.
+ * Q: 예전처럼 딸깍으로 하게는 못하나요?
+   * A: 새로운 XSS 취약점을 찾으면 가능합니다만 현재는 불가능합니다. 
+
+
+## 개발자용
+Electrobun을 사용하여 만들어졌으며 `cleaner_dom.js`을 디플로이 합니다.
+### Dev
 
 ```sh
 bun install
 bun start
 ```
 
-## Build
+### Build
 
 ```sh
 bun run build:stable

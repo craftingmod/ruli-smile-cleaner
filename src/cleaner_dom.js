@@ -336,7 +336,7 @@ const cleanerPreRequest = async () => {
 
 const articleURL = "https://bbs.ruliweb.com/member/mypage/myarticle"
 
-window.addEventListener("DOMContentLoaded", async () => {
+const handleCleanerPageReady = async () => {
   const currentUrl = window.location.href
 
   console.log(`Current URL: ${currentUrl}`)
@@ -351,4 +351,10 @@ window.addEventListener("DOMContentLoaded", async () => {
     await cleanerPreRequest()
     return
   }
-})
+}
+
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", handleCleanerPageReady)
+} else {
+  handleCleanerPageReady()
+}
