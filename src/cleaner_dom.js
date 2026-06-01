@@ -270,6 +270,7 @@ const cleanerFn = async () => {
       ``,
       `이 작업은 복구할 수 없습니다.`,
       `정말 삭제하려면 아래 입력창에 '동의합니다'를 입력해주세요.`,
+      `취소하려면 이 창을 닫거나 취소를 눌러주세요.`
     ].join("\n")
 
     return prompt(confirmMessage) === "동의합니다"
@@ -320,6 +321,103 @@ const cleanerFn = async () => {
   await runFn()
 }
 
+const awesomeButtonCSS = `
+#smile-cleaner-run {
+  position: fixed;
+  right: 24px;
+  bottom: 48px;
+  z-index: 100000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-width: 344px;
+  height: 88px;
+  padding: 0 28px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.26), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, opacity 140ms ease;
+}
+
+#smile-cleaner-run::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: #34d399;
+  box-shadow: 0 0 0 7px rgba(52, 211, 153, 0.18);
+}
+
+#smile-cleaner-run:hover {
+  background: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+#smile-cleaner-run:active {
+  transform: translateY(0);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+#smile-cleaner-run:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  #smile-cleaner-run {
+    right: 14px;
+    bottom: 14px;
+    min-width: 240px;
+    height: 64px;
+    padding: 0 18px;
+    font-size: 18px;
+  }
+}
+`
+
+const addCleanerButton = () => {
+  if (document.querySelector("#smile-cleaner-run") != null) {
+    return
+  }
+
+  const subjectDOM = document.querySelector("#mypage > .mypage_subject")
+  if (subjectDOM == null) {
+    return
+  }
+
+  const style = document.createElement("style")
+  style.textContent = awesomeButtonCSS
+  document.head.appendChild(style)
+
+  const button = document.createElement("button")
+  button.id = "smile-cleaner-run"
+  button.textContent = "황달 클리너 실행"
+  button.type = "button"
+
+  button.addEventListener("click", async () => {
+    button.disabled = true
+    button.textContent = "클리너 실행 중"
+    try {
+      await cleanerPreRequest()
+    } finally {
+      button.disabled = false
+      button.textContent = "황달 클리너 실행"
+    }
+  })
+
+  document.body.appendChild(button)
+}
+
 const cleanerPreRequest = async () => {
   const nicknameDom = document.querySelector(".nick_name > .info_value")
   if (nicknameDom == null || nicknameDom.textContent == null || nicknameDom.textContent.length <= 0) {
@@ -327,10 +425,12 @@ const cleanerPreRequest = async () => {
     return
   }
   const nickname = nicknameDom.textContent
-  const warnMessage = "진짜 작성 게시글&댓글이 모두 삭제되고 복구할 수 없습니다!"
+  const warnMessage = "진짜 작성 게시글&댓글이 모두 삭제되고 복구할 수 없습니다!\n작업 도중에 언제든지 창을 닫아 작업을 취소할 수 있습니다."
 
   if (confirm(`${nickname}님 환영합니다. 황달 클리너를 돌리시겠습니까?\n${warnMessage}`)) {
     await cleanerFn()
+  } else {
+    // Do Nothing...
   }
 }
 
@@ -342,13 +442,19 @@ const handleCleanerPageReady = async () => {
   console.log(`Current URL: ${currentUrl}`)
 
   // If not logged in, request to login
-  if (currentUrl === "https://www.ruliweb.com/") {
-    location.href = `https://user.ruliweb.com/member/login?redirect_url=${encodeURIComponent(articleURL)}`
+  if (currentUrl === "https://www.ruliweb.com/" || currentUrl === "https://bbs.ruliweb.com/") {
+    const favoriteElement = document.querySelector(".favorites")
+    if (favoriteElement != null) {
+      location.href = articleURL
+    } else {
+      // Login please
+      location.href = `https://user.ruliweb.com/member/login?redirect_url=${encodeURIComponent(articleURL)}`
+    }
     return
   }
   // If myarticle page, request to run.
   if (currentUrl === "https://bbs.ruliweb.com/member/mypage/myarticle") {
-    await cleanerPreRequest()
+    addCleanerButton()
     return
   }
 }

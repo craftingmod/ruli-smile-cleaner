@@ -14,10 +14,10 @@ const mainWindow = new BrowserWindow({
 	title: "Smile Cleaner",
 	url: articleURL,
 	frame: {
-		width: 800,
-		height: 600,
+		width: 1280,
+		height: 720,
 		x: 200,
-		y: 200,
+		y: 100,
 	},
 	preload: cleanerPreloadScript,
 });
